@@ -164,6 +164,14 @@ Plik CSV można podłączyć bezpośrednio do Power BI.
 BOOTSTRAP_SERVERS = "localhost:9092"
 ```
 
+### System Alertów (Discord Webhooks)
+```
+Skrypt `notebooks/System alertów.ipynb` działa w czasie rzeczywistym i nasłuchuje topiku `btc.prices`. 
+Pozwala na dynamiczne dodawanie reguł cenowych (np. spadek poniżej lub wzrost powyżej zadanej kwoty) do lokalnej bazy danych. Gdy nadchodząca z Kafki cena spełni warunek zapisany w bazie, system automatycznie generuje i wysyła powiadomienie na dedykowany kanał Discord przy pomocy Webhooka.
+
+**Uruchomienie:**
+Otwórz plik `System alertów.ipynb` w Jupyter Notebook i wykonaj wszystkie komórki. Zmiana parametrów w komórce z `AlertRule` pozwala na dodawanie nowych progów w locie.
+```
 ## Zatrzymanie
 
 ```bash
@@ -213,7 +221,7 @@ ProjektAnalizaDanychWCzasieRzeczywistym/
 |---|---|
 | Osoba 1 | Producer — Binance API + Kafka |
 | Osoba 2 | Kafka Consumer + Pandas/NumPy |
-| Osoba 3 | System alertów (z-score) |
+| Osoba 3 | System alertów |
 | Osoba 4 | Backend API + Baza danych + Auth |
 | Osoba 5 | Analityki + Statistics Consumer + Power BI |
 | Osoba 6 | DevOps + Docker + Prezentacja |

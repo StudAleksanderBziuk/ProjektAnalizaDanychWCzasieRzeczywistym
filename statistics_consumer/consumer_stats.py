@@ -24,7 +24,8 @@ consumer = KafkaConsumer(
     bootstrap_servers=BOOTSTRAP_SERVERS,
     value_deserializer=lambda message: json.loads(message.decode("utf-8")),
     auto_offset_reset="latest",
-    group_id="franek-btc-analytics"
+    group_id="franek-btc-analytics-3",
+    api_version=(2, 8, 0)
 )
 
 trades = deque()
@@ -232,6 +233,7 @@ print(f"Nasłuchiwanie topicu: {TOPIC}")
 print(f"Eksport CSV: {CSV_FILE}")
 
 for message in consumer:
+    print(f"DEBUG otrzymano: {message.value['price']}", flush=True)
     now = time.time()
 
     if now - last_fear_greed_fetch >= FEAR_GREED_REFRESH_SECONDS:

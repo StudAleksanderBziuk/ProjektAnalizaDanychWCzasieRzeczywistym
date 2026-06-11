@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 import redis
@@ -9,8 +10,9 @@ from auth import get_password_hash, verify_password, create_access_token
 
 models.Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="CryptoWatch API - Baza i Auth")
-redis_client = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
+app          = FastAPI(title="CryptoWatch API - Baza i Auth")
+REDIS_HOST   = os.getenv("REDIS_HOST", "localhost")
+redis_client = redis.Redis(host=REDIS_HOST, port=6379, db=0, decode_responses=True)
 
 class UserCreate(BaseModel):
     email: str
@@ -18,14 +20,21 @@ class UserCreate(BaseModel):
 
 @app.post("/register")
 def register_user(user: UserCreate, db: Session = Depends(get_db)):
-    db_user = db.query(models.User).filter(models.User.email == user.email).first()
-    if db_user:
-        raise HTTPException(status_code=400, detail="Email juz istnieje")
-    hashed_pw = get_password_hash(user.password)
-    new_user = models.User(email=user.email, hashed_password=hashed_pw)
-    db.add(new_user)
-    db.commit()
-    return {"message": "Uzytkownik zarejestrowany!"}
+    try:
+        db_user = db.query(models.User).filter(models.User.email == user.email).first()
+        if db_user:
+            raise HTTPException(status_code=400, detail="Email juz istnieje")
+        hashed_pw = get_password_hash(user.password)
+        new_user = models.User(email=user.email, hashed_password=hashed_pw)
+        db.add(new_user)
+        db.commit()
+        return {"message": "Uzytkownik zarejestrowany!"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        import traceback
+        print(traceback.format_exc())
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/login")
 def login(user: UserCreate, db: Session = Depends(get_db)):
